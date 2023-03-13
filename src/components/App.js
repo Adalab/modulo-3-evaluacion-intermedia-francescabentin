@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../styles/App.css';
-import data from '../data/data.json';
-
-
-
+import ls from '../services/localStorage';
 
 function App() {
   // variables de estado
-  const [quotes, setQuotes] = useState(data);
+  const [quotes, setQuotes] = useState(ls.get('local', []));
   const [search, setSearch] = useState('');
   const [character, setCharacter] = useState('todos');
+  const [newQuote, setNewQuote] = useState({
+    quote: '',
+    character: '',
+  })
+
+  // Fetch
+  useEffect(() => {
+    if (ls.notIncludes('cache')) {
+      fetch('https://beta.adalab.es/curso-intensivo-fullstack-recursos/apis/quotes-friends-tv-v1/quotes.json')
+        .then(response => response.json())
+        .then(data => {
+          setQuotes(data);
+          ls.set('local', data);
+        });
+    }
+  }, []);
+
 
   //handlers
-
   const handleForm = (ev) => {
     ev.preventDefault();
   }
@@ -25,6 +38,13 @@ function App() {
     setCharacter(ev.target.value);
   }
 
+  const handleNewQuote = (ev) => {
+    setNewQuote({ ...newQuote, [ev.target.id]: ev.target.value })
+  }
+  const handleClick = () => {
+    setQuotes([...quotes, newQuote]);
+    setNewQuote({ quote: '', character: '' });
+  }
 
   // renders
   const renderQuotes = () => {
@@ -44,9 +64,7 @@ function App() {
       ));
   };
 
-
   return (
-
     <div>
       <header>
         <h1>Frases de Friends</h1>
@@ -60,6 +78,7 @@ function App() {
             id='search'
             placeholder="buscar frase"
             onInput={handleSearch}
+            value={search}
           />
           <label className="fheader_select" htmlFor="select">
             filtrar por personaje
@@ -81,6 +100,35 @@ function App() {
           <ul>
             {renderQuotes()}
           </ul>
+        </section>
+        <section>
+          <h2>Anadir una nueva frase</h2>
+          <form onSubmit={handleForm}>
+            <input
+              className=""
+              type="ntext"
+              name="quote"
+              id="quote"
+              placeholder="quote"
+              onInput={handleNewQuote}
+              value={newQuote.quote}
+            />
+            <input
+              className=""
+              type="text"
+              name="character"
+              id="character"
+              placeholder="character"
+              onInput={handleNewQuote}
+              value={newQuote.character}
+            />
+            <input
+              className=""
+              type="submit"
+              value="Add"
+              onClick={handleClick}
+            />
+          </form>
         </section>
       </main>
 
