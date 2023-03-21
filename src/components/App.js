@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import '../styles/App.css';
 import ls from '../services/localStorage';
+import getDataApi from '../services/fetch';
 
 function App() {
   // variables de estado
@@ -15,8 +16,7 @@ function App() {
   // Fetch
   useEffect(() => {
     if (ls.notIncludes('cache')) {
-      fetch('https://beta.adalab.es/curso-intensivo-fullstack-recursos/apis/quotes-friends-tv-v1/quotes.json')
-        .then(response => response.json())
+      getDataApi()
         .then(data => {
           setQuotes(data);
           ls.set('local', data);
